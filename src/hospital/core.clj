@@ -6,6 +6,7 @@
             [cheshire.core :as json]
             [json-schema.core :as jsc]
             [clojure.java.io :as io]
+            [clojure.java.jdbc :as jdbc]
             [clojure.pprint :refer [pprint]]))
 
 (def health-data-path "C:/Users/marku/home/code/clojure/hospital/test_data/person_health_data.csv")
@@ -34,18 +35,32 @@
 (def health-data
   (string/split (slurp health-data-path) #"\r\n"))
 
+(def db {:classname "org.sqlite.JDBC" :subprotocol "sqlite" :subname "hospital.db"})
+
+(defn create-table
+  []
+  (jdbc/db-do-commands db (jdbc/create-table-ddl :person [[:name "Text"] [:age "INTEGER"]])))
+
+(defn insert-person [person]
+  (jdbc/insert! db :person {:name (:name person) :age (:age person)}))
+
+(defn query-person []
+  (jdbc/query db ["Select * from person"]))
+
 (defn -main
   [& _]
   (if
    (= validation-results :valid)
-    (->> health-data
-         (clean/health-data-lines)
-         (clean/generate-people)
-         (map (fn [person] (person/add-bmi person)))
-         (map (fn [person] (person/add-total-cholesterol person)))
-         (map (fn [person] (person/add-risk-score person)))
-         (filter (fn [person] (> (:risk-score person) risk-threshold)))
-         (run! (fn [person] (pprint person))))
+    (let [people (->> health-data
+                      (clean/health-data-lines)
+                      (clean/generate-people)
+                      (map (fn [person] (person/add-bmi person)))
+                      (map (fn [person] (person/add-total-cholesterol person)))
+                      (map (fn [person] (person/add-risk-score person)))
+                      (filter (fn [person] (> (:risk-score person) risk-threshold))))]
+      #(create-table)
+      (insert-person (first people))
+      (println (query-person)))
     (pprint validation-results)))
 
 
