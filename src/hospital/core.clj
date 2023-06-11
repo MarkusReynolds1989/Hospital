@@ -8,9 +8,9 @@
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]))
 
-(def health-data-path "C:/Users/marku/home/code/clojure/snake/person_health_data.csv")
-(def config-schema-path "C:/Users/marku/home/code/clojure/snake/config.schema.json")
-(def config-path "C:/Users/marku/home/code/clojure/snake/config.json")
+(def health-data-path "C:/Users/marku/home/code/clojure/hospital/test_data/person_health_data.csv")
+(def config-schema-path "C:/Users/marku/home/code/clojure/hospital/config/config.schema.json")
+(def config-path "C:/Users/marku/home/code/clojure/hospital/config/config.json")
 
 (defn read-json
   [file]
@@ -35,7 +35,6 @@
   (string/split (slurp health-data-path) #"\r\n"))
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [& _]
   (if
    (= validation-results :valid)
