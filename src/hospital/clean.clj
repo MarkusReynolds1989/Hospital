@@ -1,6 +1,5 @@
 (ns hospital.clean
-  (:require [hospital.person :as person]
-            [clojure.string :as string]))
+  (:require [clojure.string :as string]))
 
 (defn health-data-lines
   [data]
@@ -9,9 +8,8 @@
        (map (fn [line] (string/split line #",")))))
 
 (defn generate-person
-  [[id name age height weight ldl hdl]]
-  (try {:id (Integer/parseInt id)
-        :name name
+  [[_ name age height weight ldl hdl]]
+  (try {:name name
         :age (Integer/parseInt age)
         :height (Double/parseDouble height)
         :weight (Double/parseDouble weight)

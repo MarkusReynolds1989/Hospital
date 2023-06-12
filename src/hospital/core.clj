@@ -30,7 +30,7 @@
 
 (def validation-results (validate-json config config-schema))
 
-(def risk-threshold (:risk-threshold config))
+;(def risk-threshold (:risk-threshold config))
 
 (def health-data
   (string/split (slurp health-data-path) #"\r\n"))
@@ -39,13 +39,32 @@
 
 (defn create-table
   []
-  (jdbc/db-do-commands db (jdbc/create-table-ddl :person [[:name "Text"] [:age "INTEGER"]])))
+  (jdbc/db-do-commands db (jdbc/create-table-ddl
+                           :person [[:name "Text"]
+                                    [:age "Integer"]
+                                    [:height "Real"]
+                                    [:weight "Real"]
+                                    [:ldl "Real"]
+                                    [:hdl "Real"]
+                                    [:bmi "Real"]
+                                    [:total_cholesterol "Real"]
+                                    [:risk_score "Real"]])))
 
 (defn insert-person [person]
-  (jdbc/insert! db :person {:name (:name person) :age (:age person)}))
+  (jdbc/insert! db
+                :person
+                {:name (:name person)
+                 :age (:age person)
+                 :height (:height person)
+                 :weight (:weight person)
+                 :ldl (:ldl person)
+                 :hdl (:hdl person)
+                 :bmi (:bmi person)
+                 :total_cholesterol (:total-cholesterol person)
+                 :risk_score (:risk-score person)}))
 
 (defn query-person []
-  (jdbc/query db ["Select * from person"]))
+  (jdbc/query db ["Select rowid,* from person"]))
 
 (defn -main
   [& _]
@@ -56,11 +75,10 @@
                       (clean/generate-people)
                       (map (fn [person] (person/add-bmi person)))
                       (map (fn [person] (person/add-total-cholesterol person)))
-                      (map (fn [person] (person/add-risk-score person)))
-                      (filter (fn [person] (> (:risk-score person) risk-threshold))))]
-      #(create-table)
-      (insert-person (first people))
-      (println (query-person)))
+                      (map (fn [person] (person/add-risk-score person))))]
+      (create-table)
+      (run! (fn [person] (insert-person person)) people)
+      (pprint (query-person)))
     (pprint validation-results)))
 
 

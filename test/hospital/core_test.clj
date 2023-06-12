@@ -1,6 +1,5 @@
 (ns hospital.core-test
-  (:require [clojure.test :refer :all]
-            [hospital.core :refer :all]
+  (:require [clojure.test :refer [deftest is testing]]
             [hospital.person :as person]))
 
 (def tom {:id 0 :name "tom" :age 23 :height 1.83 :weight 80.0 :ldl 10.0 :hdl 10.0})
